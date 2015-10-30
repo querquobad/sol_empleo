@@ -1,5 +1,7 @@
 $(function() {
-	$('#tbl_aspirantes').DataTable({
+	$('#tbl_aspirantes').on('preXhr.dt',function() {
+		alert('hola');
+	}).DataTable({
 		'autoWidth' : true,
 		'ajax' : {
 			'url' : 'controllers/usuario.php',
@@ -53,7 +55,7 @@ $(function() {
 		$('#tbl_aspirantes').find('tr').each(function() {
 			var idx = $(this).find('button.details_btn').data('fila');
 			$(this).trigger('hide_chld',idx);
-		});
+	});
 		var datos = $('#tbl_aspirantes').DataTable().row(row).data();
 		$('#tbl_aspirantes').DataTable().row(row).child('<table class="table">'+
 				'<tr><td>Nacionalidad:</td><td>'+datos.nacionalidad+'</td><td>Lugar de nacimiento:</td><td>'+datos.lugar_nacimiento+'</td>'+

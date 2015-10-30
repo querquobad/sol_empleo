@@ -5,6 +5,9 @@ $(function() {
 	$('#frm_login').on('submit',function(ev) {
 		ev.preventDefault();
 		window.usuario.email = $('#username').val();
+		$('body').one('shown.bs.modal',function() {
+			$('#password').focus();
+		});
 		$.ajax({
 			'url' : 'controllers/usuario.php',
 			'method' : 'POST',
@@ -17,13 +20,15 @@ $(function() {
 			'beforeSend' : function() {
 				$('#modal-body').empty();
 			},
-			'success' : function() {
-				$('#modal-body').append('<form id="frm_pass">Password:&nbsp;<input type="password" id="password" name="password" class="form-control" /><button type="submit">Enviar</button></form>');
+			'success' : function(data) {
+				if (data.data[0] != undefined && data.data[0].admin == true) {
+					$('#modal-body').append('<form id="frm_pass">Password:&nbsp;<input type="password" id="password" name="password" class="form-control" /><button type="submit">Enviar</button></form>');
+				} else {
+					$('#modal-body').append('Aspirante:<br />Verifique que su email esté correcto.<br /><form><input type="text" id="email" value="'+
+							window.usuario.email+'" /><button type="submit">Enviar</button></form>');
+				}
 			},
-			'error' : function() {
-				$('#modal-body').append('Aspirante:<br />Verifique que su email esté correcto.<br /><form><input type="text" id="email" value="'+
-						window.usuario.email+'" /><button type="submit">Enviar</button></form>');
-			},
+			'error' : function() {},
 			'complete' : function() {
 				$('#btn_modal').trigger('click');
 			}

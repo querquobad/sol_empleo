@@ -38,6 +38,12 @@ class Aspirantecontroller extends abstractDB {
 	public function del() {
 		return null;
 	}
+	public function login ($args){
+		$retval =  $this->query('SELECT * FROM aspirantes WHERE email = ?',array($args['email']));
+		$_SESSION['email'] = $_POST['email'];
+		$_SESSION['admin'] = false;
+		return $retval;
+	}
 }
 
 ?>

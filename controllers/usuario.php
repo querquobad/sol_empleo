@@ -63,7 +63,12 @@ class Usuariocontroller extends abstractDB {
 
 	public function login ($args){
 		$retval =  $this->query('SELECT PASSWORD(?) = password as login FROM usuarios WHERE email = ?',array($args['password'],$args['email']));
-		if ($retval[0]['login'] == '1') $_SESSION['email'] = $_POST['email'];
+		if ($retval[0]['login'] == '1') {
+			$_SESSION['email'] = $_POST['email'];
+			$_SESSION['admin'] = true;
+		} else {
+			throw new RuntimeException('Login inválido');
+		}
 		return $retval;
 	}
 }
@@ -72,6 +77,7 @@ $user = new Usuariocontroller();
 if (isset($_POST['request'])) {
 	try {
 		$datos = call_user_func(array($user,$_POST['request']),$_POST);
+		if (is_array($datos)) $datos[0]['admin'] = true;
 	} catch (RuntimeException $e) {
 		$user = new Aspirantecontroller();
 		$datos = call_user_func(array($user,$_POST['request']),$_POST);
@@ -80,13 +86,14 @@ if (isset($_POST['request'])) {
 } else {
 	throw new RuntimeException('request vacío');
 }
-$retval = json_encode(array('data' => $datos),JSON_FORCE_OBJECT);
-if (!$retval) {
+$retval = array('data' => $datos);
+$json = json_encode(array('data' => $datos));
+if ($json === false) {
 	error_log(json_last_error_msg());
 	foreach ($datos as &$dato_actual) foreach ($dato_actual as &$dato_real) $dato_real = utf8_encode($dato_real);
-	$retval = json_encode(array('data' => $datos));
-	if (!$retval) throw new RuntimeException('Error JSON:'.json_last_error_msg());
+	$json = json_encode(array('data' => $datos));
+	if (!$json) throw new RuntimeException('Error JSON:'.json_last_error_msg());
 }
-echo $retval;
+echo $json
 
 ?>
