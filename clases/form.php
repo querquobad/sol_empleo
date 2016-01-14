@@ -6,15 +6,15 @@ class form extends element {
 	public function __construct($att=array()) {
 		if (isset($att['tag']) && $att['tag'] !== 'form') throw new RuntimeException('No se puede crear un elemento '.$att['tag'].' con la clase form');
 		$att['tag'] = 'form';
-		parent::__construct($att);
-		if (in_array('role',$this->atributos)) {
-			if ($this->atributos['tipo'] === 'horizontal' || $this->atributos['tipo'] === 'inline') {
-				$this->tipo = $this->atributos['tipo'];
-				unset($this->atributos['tipo']);
-				$this->addClass('form-'.$this->tipo);
+		if (in_array('role',$att)) {
+			if ($att['tipo'] === 'horizontal' || $att['tipo'] === 'inline') {
+				$this->tipo = $att['tipo'];
+				unset($att['tipo']);
+				$this->addAtributo('class','form-'.$att['tipo']);
 			}
 		}
 		$this->addAtributo('role','form');
+		parent::__construct($att);
 	}
 }
 

@@ -8,7 +8,7 @@ function doAjax(obj,callback) {
 		obj.url = 'ws.php';
 	}
 	if (obj.dataType == undefined || obj.jsonp == undefined) {
-		obj.dataType = json;
+		obj.dataType = 'json';
 		obj.jsonp = false;
 	}
 	if (obj.method == undefined && obj.type == undefined) { // en JQuery type y method son sinónimos
@@ -27,7 +27,7 @@ function doAjax(obj,callback) {
 	obj.error = function() {
 		retval = false;
 	}
-	obj.complete = function() {
+	obj.complete = function(jqxhr,text) {
 		callback(jqxhr,retval,text);
 	}
 	$.ajax(obj);

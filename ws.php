@@ -1,0 +1,15 @@
+<?php
+
+require_once('autoload.php');
+require_once('sesiones.php');
+$req = new rest();
+$args = $req->getArgs();
+$obj = new $args['request']($db,$args);
+$tipo = $req->getType();
+if (!isset($args['action'])) {
+	echo $req->response($obj->$tipo());
+} else {
+	echo $req->response($obj->$args['action']($args));
+}
+
+?>
