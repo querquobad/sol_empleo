@@ -7,7 +7,7 @@ $args = $req->getArgs();
 $obj = new $args['request']($db,$args);
 $tipo = $req->getType();
 if (!isset($args['action'])) {
-	echo $req->response($obj->$tipo());
+	echo $req->response($obj->$tipo($args));
 } else {
 	echo $req->response($obj->$args['action']($args));
 }

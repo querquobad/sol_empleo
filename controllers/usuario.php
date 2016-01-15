@@ -1,16 +1,40 @@
 <?php
 
-require_once('../autoload.php');
-require_once('../sesiones.php');
-class Usuariocontroller extends abstractDB {
-	public $nombre;
-	public $apellido;
-	public $email;
-	private $password;
-	protected $id;
-	private $rows;
+class usuario{
+	private $perfil;
+	private $email;
+	private $nombre_perfil;
+	private $conn;
 
-	public function get($request=array()) {
+	function __construct($db,$args=array()) {
+		// Necesitamos el la base de datos.
+		$this->conn = $db;
+		/*
+		 * Si ya tenemos un usuario en la sesión lo regresamos de lo contrario generamos uno
+		 */
+		if (isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario')) return $_SESSION['usuario']; 
+		/*
+		 * Esto trata de validar si el usuario es efectivamente un 'usuario' o es un 'aspirante'
+		 * Como son dos tablas tenemos que unirlas
+		 */
+		if (!isset($args['email'])) throw new RuntimeException('Argumentos inválidos para nuevo usuario');
+		$recs = $db->query(
+		'SELECT * FROM ('.
+			'SELECT a.id, email, \'1\' AS usuario, a.perfil, b.perfil as nombre_perfil '.
+				'FROM usuarios a LEFT JOIN perfiles b on a.perfil = b.id '.
+			'UNION '.
+				'SELECT id, email, \'0\' AS usuario, ('.
+					'SELECT id FROM perfiles WHERE perfil = \'aspirante\''.
+				') as perfil, \'aspirante\' as nombre_perfil '.
+				'FROM aspirantes'.
+		') o WHERE o.email = ?',array($args['email']));
+		if (count($recs) > 1) throw new RuntimeException('E-Mail duplicado'); //Esto en el caso de que el email esté en ambas tablas
+		$this->email = $recs[0]['email'];
+		$this->perfil = $recs[0]['perfil'];
+		$this->nombre_perfil = $recs[0]['nombre_perfil'];
+	}
+
+	function get($request=array()) {
 		$user_email = $request['email'];
 		if($user_email != '') {
 			$this->rows = $this->query('
@@ -30,7 +54,7 @@ class Usuariocontroller extends abstractDB {
 		}
 	}
 
-	public function set($user_data=array()) {
+	function set($user_data=array()) {
 		if(array_key_exists('email', $user_data)) {
 			$this->get($user_data['email']);
 			if($user_data['email'] != $this->email) {
@@ -46,9 +70,9 @@ class Usuariocontroller extends abstractDB {
 		}
 	}
 
-	public function edit($user_data=array()) {
+	function edit($user_data=array()) {
 		foreach ($user_data as $campo=>$valor) {
-			$$campo = $valor;
+			$campo = $valor;
 		}
 		$this->query = 'UPDATE usuarios '.
 				'SET nombre=?, '.
@@ -56,44 +80,23 @@ class Usuariocontroller extends abstractDB {
 				'WHERE email = ?';
 	}
 
-	public function del($user_email='') {
+	function del($user_email='') {
 		$this->query = 'DELETE FROM usuarios '.
 				'WHERE email = ?';
 	}
 
-	public function login ($args){
-		$retval =  $this->query('SELECT PASSWORD(?) = password as login FROM usuarios WHERE email = ?',array($args['password'],$args['email']));
+	public function login ($args=array()){
+		$retval =  $this->conn->query('SELECT PASSWORD(?) = password as login FROM usuarios WHERE email = ?',array($args['password'],$args['email']));
 		if ($retval[0]['login'] == '1') {
-			$_SESSION['email'] = $_POST['email'];
-			$_SESSION['admin'] = true;
-		} else {
-			throw new RuntimeException('Login inválido');
+			$_SESSION['usuario'] = $this;
 		}
-		return $retval;
+		return $retval[0];
+	}
+
+	public function validaUsuario($args=array()) {
+		if ($this->nombre_perfil == 'aspirante') return false;
+		return true;
 	}
 }
-require_once('aspirantes.php');
-$user = new Usuariocontroller();
-if (isset($_POST['request'])) {
-	try {
-		$datos = call_user_func(array($user,$_POST['request']),$_POST);
-		if (is_array($datos)) $datos[0]['admin'] = true;
-	} catch (RuntimeException $e) {
-		$user = new Aspirantecontroller();
-		$datos = call_user_func(array($user,$_POST['request']),$_POST);
-	}
-	if (!is_array($datos)) throw new RuntimeException('No existe propiedad');
-} else {
-	throw new RuntimeException('request vacío');
-}
-$retval = array('data' => $datos);
-$json = json_encode(array('data' => $datos));
-if ($json === false) {
-	error_log(json_last_error_msg());
-	foreach ($datos as &$dato_actual) foreach ($dato_actual as &$dato_real) $dato_real = utf8_encode($dato_real);
-	$json = json_encode(array('data' => $datos));
-	if (!$json) throw new RuntimeException('Error JSON:'.json_last_error_msg());
-}
-echo $json
 
 ?>

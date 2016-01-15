@@ -1,5 +1,6 @@
 $(function() {
 	$('body').one('shown.bs.modal',function() {
+		//Cuando se muestre el modal darle el foco al password (para el login)
 		$('#password').focus();
 	});
 	$('#frm_login').on('submit',function(ev) {
@@ -43,20 +44,18 @@ $(function() {
 				'action' : 'login',
 				'email' : window.usuario.email,
 				'password' : $('#password').val()
-			},
-			'dataType' : 'json',
-			'jsonp' : false,
-			'complete' : function() {
-				location.reload();
-				$('#modal_close').trigger('click');
 			}
 		},function(jqxhr,data,text){
 			if (data !== false) {
 				// Got the cookie ¿como se valida ésto?
-				location.reload();
+				if (data['login'] == false) alert('Usuario/contraseña inválido');
 			} else {
 				alert('Error de ajax');
 			}
+			/*
+			 * Recargamos la página independientemente si el login es o no correcto
+			 */
+			location.reload();
 		});
 		return false; // Porfavor que esto ya deje de subir por el DOM!!!
 	});
