@@ -38,18 +38,48 @@ if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 			'id' => 'menu_usuario',
 			'tag' => 'div',
 			new element(array(
-				'tag' => 'table' // Aqui se agregan los elementos del menú
+				'tag' => 'ul', // Aqui se agregan los elementos del menú
+				'class' => 'nav nav-tabs', //BootStrap tabs
+
 			))
 		))
 	);
+	$html->getElementById('bt-container')->addElement(new element(array(
+		'tag' => 'div',
+		'class' => 'tab-content',
+		'id' => 'tab-content'
+	))); //Aqui va el contenido de los tabs
 	foreach($_SESSION['usuario']->getMenu() as $value) {
-		$html->getElementById('menu_usuario')->getElementByTag('table')->addElement(new element(array(
-			'tag' => 'td',
-			'data-menuId' => $value['id'],
-			'_text' => $value['leyenda']
-		)));
+		$active = true;
+		/*
+		 * Agregamos el contenido y el menu
+		 */
+		try {
+			$html->getElementById('tab-content')->addElement(new element(array(
+				'tag' => 'div',
+				'id' => $value['leyenda'],
+				'class' => 'tab-pane fade',
+				include_once('view/'.stripAccents($value['leyenda']).'.php') //Si el archivo no existe debe arrojar ErrorException
+			)));
+			if($active) {
+				$html->getElementById($value['leyenda'])->addAtributo('class','in active');
+				$active = false; // Esto es únicamente para el primer tab
+			}
+			// Si hemos llegado aqui el archivo existe y por lo tanto podemos agregar el menu
+			$html->getElementById('menu_usuario')->getElementByTag('ul')->addElement(new element(array(
+				'tag' => 'li',
+				new element(array(
+					'tag' => 'a',
+					'data-toggle' => 'tab',
+					'href' => '#'.$value['leyenda'],
+					'_text' => $value['leyenda']
+				))
+			)));
+		} catch (ErrorException $e) {
+			error_log('No se encontró el archivo view/'.stripAccents($value['leyenda']).'.php');
+		}
 	}
-
+	$html->getElementById('menu_usuario')->getElementByTag('ul')->getElementByTag('li')->addAtributo('class','active'); //El primer li en el primer ul en el menu
 }
 echo '<!DOCTYPE html>'."\n";
 echo $html->render();
