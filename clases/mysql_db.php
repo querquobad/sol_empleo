@@ -2,6 +2,15 @@
 
 class mysql_db extends mysqli {
 
+	public function __construct($host, $user, $pass, $db) {
+		parent::__construct($host, $user, $pass, $db);
+
+		if (mysqli_connect_error()) {
+		    die('No se pudo conectar a la base de datos (' . mysqli_connect_errno() . ') '
+			    . mysqli_connect_error());
+		}
+	}
+
 	public function query_all($sql,$data=array()) {
 
 		if (!is_string($sql) || !is_array($data)) throw new RuntimeException('Argumentos inválidos para query_all()');
