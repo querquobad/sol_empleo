@@ -1,14 +1,14 @@
 <?php
 
 class usuario{
+	private $id;
 	private $perfil;
 	private $email;
 	private $nombre_perfil;
-	private $conn;
 
-	function __construct($db,$args=array()) {
+	function __construct($args=array()) {
 		// Necesitamos el la base de datos.
-		$this->conn = $db;
+		$conn = new mysql_db('localhost','sol_empleo','sol.empleo','sol_empleo');
 		/*
 		 * Si ya tenemos un usuario en la sesión lo regresamos de lo contrario generamos uno
 		 */
@@ -18,10 +18,10 @@ class usuario{
 		 * Como son dos tablas tenemos que unirlas
 		 */
 		if (!isset($args['email'])) throw new RuntimeException('Argumentos inválidos para nuevo usuario');
-		$recs = $db->query(
+		$recs = $conn->query_all(
 		'SELECT * FROM ('.
-			'SELECT a.id, email, \'1\' AS usuario, a.perfil, b.perfil as nombre_perfil '.
-				'FROM usuarios a LEFT JOIN perfiles b on a.perfil = b.id '.
+				'SELECT a.id, email, \'1\' AS usuario, a.perfil, b.perfil as nombre_perfil '.
+					'FROM usuarios a LEFT JOIN perfiles b on a.perfil = b.id '.
 			'UNION '.
 				'SELECT id, email, \'0\' AS usuario, ('.
 					'SELECT id FROM perfiles WHERE perfil = \'aspirante\''.
@@ -29,6 +29,7 @@ class usuario{
 				'FROM aspirantes'.
 		') o WHERE o.email = ?',array($args['email']));
 		if (count($recs) > 1) throw new RuntimeException('E-Mail duplicado'); //Esto en el caso de que el email esté en ambas tablas
+		$this->id = $recs[0]['id'];
 		$this->email = $recs[0]['email'];
 		$this->perfil = $recs[0]['perfil'];
 		$this->nombre_perfil = $recs[0]['nombre_perfil'];
@@ -86,7 +87,8 @@ class usuario{
 	}
 
 	public function login ($args=array()){
-		$retval =  $this->conn->query('SELECT PASSWORD(?) = password as login FROM usuarios WHERE email = ?',array($args['password'],$args['email']));
+		$conn = new mysql_db('localhost','sol_empleo','sol.empleo','sol_empleo');
+		$retval =  $conn->query_all('SELECT PASSWORD(?) = password as login FROM usuarios WHERE email = ?',array($args['password'],$args['email']));
 		if ($retval[0]['login'] == '1') {
 			$_SESSION['usuario'] = $this;
 		}

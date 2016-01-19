@@ -63,5 +63,4 @@ function exception_error_handler($severity, $message, $file, $line) {
 }
 set_error_handler("exception_error_handler");
 
-$db = new db();
 ?>
