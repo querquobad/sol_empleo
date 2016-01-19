@@ -57,10 +57,15 @@ function http_response($code){
 	return $code.' '.$status[$code];
 }
 
+function stripAccents($string){
+	return strtr($string,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ','aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
+}
+
 //Manejar excepciones en lugar de errores
 function exception_error_handler($severity, $message, $file, $line) {
     throw new ErrorException($message, 0, $severity, $file, $line);
 }
 set_error_handler("exception_error_handler");
+
 
 ?>
