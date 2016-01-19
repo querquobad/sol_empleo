@@ -42,11 +42,11 @@ if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 			))
 		))
 	);
-	foreach($db->query('SELECT id, IFNULL(leyenda,archivo) as menu, archivo FROM menu',array()) as $key => $value) {
+	foreach($_SESSION['usuario']->getMenu() as $value) {
 		$html->getElementById('menu_usuario')->getElementByTag('table')->addElement(new element(array(
 			'tag' => 'td',
 			'data-menuId' => $value['id'],
-			'_text' => $value['menu']
+			'_text' => $value['leyenda']
 		)));
 	}
 

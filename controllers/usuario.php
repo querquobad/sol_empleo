@@ -99,6 +99,19 @@ class usuario{
 		if ($this->nombre_perfil == 'aspirante') return false;
 		return true;
 	}
+
+	public function getMenu() {
+		$conn = new mysql_db('localhost','sol_empleo','sol.empleo','sol_empleo');
+		return $conn->query_all(
+			'SELECT '.
+				'menu.id, menu.leyenda '.
+			'FROM '.
+				'menu, perfil_menu, usuarios '.
+			'WHERE '.
+				' usuarios.id = ? and perfil_menu.perfil = usuarios.perfil and menu.id = perfil_menu.menu',
+			array($this->id)
+		);
+	}
 }
 
 ?>
