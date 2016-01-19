@@ -19,7 +19,7 @@ $html->getElementByTag('body')->addElement(new element(array( // Este es el cont
 	'id' => 'bt-container',
 	'class' => 'container-fluid',
 )));
-if (!isset($_SESSION['usuario'])) {
+if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 	// Si no tenemos sesión nos vamos a identificar
 	$html->getElementById('bt-container')->addElement(include('view/login.php'));
 	$html->getElementByTag('head')->addElement(new element(array(
