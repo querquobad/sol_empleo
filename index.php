@@ -61,6 +61,10 @@ if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 				'class' => 'tab-pane fade',
 				include_once('view/'.stripAccents($value['leyenda']).'.php') //Si el archivo no existe debe arrojar ErrorException
 			)));
+			$html->getElementByTag('head')->addElement(new element(array( // Tambien agregamos en el head el javascript correspondiente
+				'tag' => 'script',
+				'src' => 'js/'.stripAccents($value['leyenda']).'.js'
+			)));
 			if($active) {
 				$html->getElementById($value['leyenda'])->addAtributo('class','in active');
 				$active = false; // Esto es únicamente para el primer tab
