@@ -63,6 +63,7 @@ if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 			)));
 			$html->getElementByTag('head')->addElement(new element(array( // Tambien agregamos en el head el javascript correspondiente
 				'tag' => 'script',
+				'id' => false,
 				'src' => 'js/'.stripAccents($value['leyenda']).'.js'
 			)));
 			if($active) {
