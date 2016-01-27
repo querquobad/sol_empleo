@@ -84,7 +84,10 @@ if (!(isset($_SESSION['usuario']) && is_a($_SESSION['usuario'],'usuario'))) {
 			error_log('No se encontró el archivo view/'.stripAccents($value['leyenda']).'.php');
 		}
 	}
-	$html->getElementById('menu_usuario')->getElementByTag('ul')->getElementByTag('li')->addAtributo('class','active'); //El primer li en el primer ul en el menu
+	/*
+	 * El primer li en el primer ul en el menu
+	 */
+	$html->getElementById('menu_usuario')->getElementByTag('ul')->getElementByTag('li')->addAtributo('class','active');
 }
 echo '<!DOCTYPE html>'."\n";
 echo $html->render();
